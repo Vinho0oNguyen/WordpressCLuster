@@ -1,0 +1,183 @@
+
+image:
+  registry: docker.io
+  repository: bitnami/mariadb
+  tag: latest
+ 
+  pullPolicy: IfNotPresent
+  
+  pullSecrets: []
+  
+  debug: false
+
+## @param architecture MariaDB architecture (`standalone` or `replication`)
+##
+architecture: replication
+## MariaDB Authentication parameters
+##
+auth:
+  ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided.
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb#setting-the-root-password-on-first-run
+  ##
+  rootPassword: ""
+  ## @param auth.database Name for a custom database to create
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-on-first-run
+  ##
+  database: mydb
+  ## @param auth.username Name for a custom user to create
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
+  ##
+  username: "vinh"
+  ## @param auth.password Password for the new user. Ignored if existing secret is provided
+  ##
+  password: "812037vn"
+  
+primary:
+  ## MariaDB primary Pod security context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param primary.podSecurityContext.enabled Enable security context for MariaDB primary pods
+  ## @param primary.podSecurityContext.fsGroup Group ID for the mounted volumes' filesystem
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  ## MariaDB primary container security context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param primary.containerSecurityContext.enabled MariaDB primary container securityContext
+  ## @param primary.containerSecurityContext.runAsUser User ID for the MariaDB primary container
+  ## @param primary.containerSecurityContext.runAsNonRoot Set Controller container's Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+  ## MariaDB primary container's resource requests and limits
+  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  ## @param primary.resources.limits The resources limits for MariaDB primary containers
+  ## @param primary.resources.requests The requested resources for MariaDB primary containers
+  ##
+  resources:
+    ## Example:
+    ## limits:
+    ##    cpu: 100m
+    ##    memory: 256Mi
+    ##
+    limits: {}
+    ## Examples:
+    ## requests:
+    ##    cpu: 100m
+    ##    memory: 256Mi
+    ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param primary.readinessProbe.enabled Enable readinessProbe
+  ## @param primary.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param primary.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param primary.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param primary.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param primary.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  persistence:
+    ## @param primary.persistence.enabled Enable persistence on MariaDB primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
+    ##
+    enabled: true
+    ## @param primary.persistence.existingClaim Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas
+    ## NOTE: When it's set the rest of persistence parameters are ignored
+    ##
+    existingClaim: ""
+    ## @param primary.persistence.subPath Subdirectory of the volume to mount at
+    ##
+    #subPath: ""
+    mountPath: /bitnami/mariadb
+    ## @param primary.persistence.storageClass MariaDB primary persistent volume storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    storageClass: "standard"
+    ## @param primary.persistence.annotations MariaDB primary persistent volume claim annotations
+    ##
+    annotations: {}
+    ## @param primary.persistence.accessModes MariaDB primary persistent volume access Modes
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param primary.persistence.size MariaDB primary persistent volume size
+    ##
+    size: 8Gi
+## Mariadb Secondary parameters
+##
+secondary:
+  ## @param secondary.replicaCount Number of MariaDB secondary replicas
+  ##
+  replicaCount: 2
+
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+  
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  
+  persistence:
+    ## @param secondary.persistence.enabled Enable persistence on MariaDB secondary replicas using a `PersistentVolumeClaim`
+    ##
+    enabled: true
+    ## @param secondary.persistence.subPath Subdirectory of the volume to mount at
+    ##
+    mountPath: /bitnami/mariadb
+    ## @param secondary.persistence.storageClass MariaDB secondary persistent volume storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    storageClass: "standard"
+    ## @param secondary.persistence.annotations MariaDB secondary persistent volume claim annotations
+    ##
+    annotations: {}
+    ## @param secondary.persistence.accessModes MariaDB secondary persistent volume access Modes
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param secondary.persistence.size MariaDB secondary persistent volume size
+    ##
+    size: 8Gi
+    
