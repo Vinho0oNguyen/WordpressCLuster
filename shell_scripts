@@ -1,4 +1,4 @@
-#Setup alias: ~/.bash_alias
+#Setup alias: ~/.bash_aliases; source ~/.bash_aliases
 alias k='kubectl'
 alias ns='kubectl config set-context --current --namespace'
 alias kurrent='kubectl config view --minify -o "jsonpath={..namespace}" | xargs -I %s echo "Current Namespace: %s"'
