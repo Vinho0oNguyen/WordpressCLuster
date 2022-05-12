@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodbexpress-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mgexpress
+  template:
+    metadata:
+      labels:
+        app: mgexpress
+    spec:
+      containers:
+      - name: mgexpress
+        image: mongo-express
+        resources: {}
+          # limits:
+          #   memory: "128Mi"
+          #   cpu: "500m"
+        ports:
+        - containerPort: 8081
+        env:
+          - name: ME_CONFIG_MONGODB_ADMINUSERNAME 
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-pass
+                key: MONGO_INITDB_ROOT_USERNAME
+          - name: ME_CONFIG_MONGODB_ADMINPASSWORD 
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-pass
+                key: MONGO_INITDB_ROOT_PASSWORD
+          - name: ME_CONFIG_MONGODB_SERVER
+            valueFrom:
+               configMapKeyRef:
+                 name: mgexpress-configmap
+                 key: database_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mgexpress-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: mgexpress
+  ports:
+  - port: 8081
+    targetPort: 8081
+    nodePort: 30000
+    
